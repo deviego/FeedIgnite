@@ -5,41 +5,46 @@ import ptBR from "date-fns/locale/pt-BR";
 import style from "./Post.module.css";
 import { ChangeEvent, FormEvent, useState } from "react";
 
-interface Author{
+interface Author {
   name: string;
-  avatarUrl:string;
-  role:string;
+  avatarUrl: string;
+  role: string;
 }
 
-interface Content{
-  type: string,
-  content:string;
+interface Content {
+  type: "paragraph" | "link";
+  content: string;
 }
 
-interface PostProps{
-  author:Author;
-  publishedAt:Date;
-  content:Content[];
+export interface PostType {
+  id: number;
+  author: Author;
+  publishedAt: Date;
+  content: Content[];
 }
 
-export const Post = ({ author, publishedAt, content }: PostProps) => {
+interface PostProps {
+  post: PostType;
+}
+
+export const Post = ({ post }: PostProps) => {
   const publishedDateFormatted = format(
-    publishedAt,
+    post.publishedAt,
     " dd 'de' LLLL 'às' HH:mm 'h'",
     {
       locale: ptBR,
     }
   );
 
-  const publichedDataRelativeToNow = formatDistanceToNow(publishedAt, {
+  const publichedDataRelativeToNow = formatDistanceToNow(post.publishedAt, {
     locale: ptBR,
     addSuffix: true,
   });
 
   const [newCommentText, setNewCommentText] = useState("");
-  const [comment, setComment] = useState(['Massa esse post!']);
+  const [comment, setComment] = useState(["Massa esse post!"]);
 
-  function handleNewComment(event:FormEvent) {
+  function handleNewComment(event: FormEvent) {
     event.preventDefault();
 
     setComment([...comment, newCommentText]);
@@ -47,11 +52,11 @@ export const Post = ({ author, publishedAt, content }: PostProps) => {
     setNewCommentText("");
   }
 
-  function handleNewCommentText(event:ChangeEvent<HTMLTextAreaElement>) {
+  function handleNewCommentText(event: ChangeEvent<HTMLTextAreaElement>) {
     setNewCommentText(event.target.value);
   }
 
-  function deleteComment(commentToDelete:string) {
+  function deleteComment(commentToDelete: string) {
     const commentWithoutDeleteOne = comment.filter((comment) => {
       return comment !== commentToDelete;
     });
@@ -64,16 +69,16 @@ export const Post = ({ author, publishedAt, content }: PostProps) => {
     <article className={style.post}>
       <header>
         <div className={style.author}>
-          <Avatar src={author.avatarUrl} />
+          <Avatar src={post.author.avatarUrl} />
 
           <div className={style.authorInfo}>
-            <strong>{author.name}</strong>
-            <span> {author.role}</span>
+            <strong>{post.author.name}</strong>
+            <span> {post.author.role}</span>
           </div>
         </div>
         <time
           title={publishedDateFormatted}
-          dateTime={publishedAt.toISOString()}
+          dateTime={post.publishedAt.toISOString()}
         >
           {" "}
           {publichedDataRelativeToNow}
@@ -81,7 +86,7 @@ export const Post = ({ author, publishedAt, content }: PostProps) => {
       </header>
 
       <div className={style.content}>
-        {content.map((line) => {
+        {post.content.map((line) => {
           if (line.type === "paragraph") {
             return <p key={line.content}>{line.content}</p>;
           } else if (line.type === "link") {
